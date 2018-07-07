@@ -31,6 +31,6 @@ def extract_regions(data, regions):
     for region in regions:
         out_dict[region] = []
         for arr in data:
-            out_dict[region].append(data[regions[region][0]:regions[region][1],
+            out_dict[region].append(arr[regions[region][0]:regions[region][1],
                                     regions[region][2]:regions[region][3]])
     return out_dict
