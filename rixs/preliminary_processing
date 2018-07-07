@@ -3,17 +3,17 @@
 def extract_regions(data, regions):
     '''Extracts a series of regions from a series of 2D images.
 
-    This function takes in a 2D numpy array and a dictionary defining a
-    group of regions. It outputs a dictionary containg each of the regions
-    names as a keyword and a numpy array as the value.
+    This function takes in a list of 2D numpy arrays and a dictionary defining
+    a group of regions. It outputs a dictionary containing each of the regions
+    names as a keyword and a list of numpy arrays as the value.
         The input dictionary has the form:
         dict = { 'region1_name' : [left1, right1, top1, bottom1],
                  'region2_name' : [left2, right2, top2, bottom2],....}
 
     Parameters
     ----------
-    data : array
-        This is a 2D numpy array.
+    data : list
+        This is a list of 2D numpy arrays.
     regions : dict
         A dictionary of regions that the images in 'data' are to be
         extracted too.
@@ -29,6 +29,8 @@ def extract_regions(data, regions):
 
     out_dict = {}
     for region in regions:
-        out_dict[region] = data[regions[region][0]:regions[region][1],
-                                regions[region][2]:regions[region][3]]
+        out_dict[region] = []
+        for arr in data:
+            out_dict[region].append(data[regions[region][0]:regions[region][1],
+                                    regions[region][2]:regions[region][3]])
     return out_dict
