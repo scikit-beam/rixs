@@ -5,7 +5,7 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 
 
-@pytest.fixture 
+@pytest.fixture
 def make_fake_image(curvature, elastic_y, sigma=2, noise=0.002):
     """Make a fake list of photon events.
     Parameters
@@ -41,7 +41,6 @@ def test_curvature_fit():
     """Test curvature fit on simulated data."""
     fake_curvature = np.array([0.02, 1000.])
     photon_events = make_fake_image(fake_curvature, 1000., noise=0)
-    vary_params = dict(x0=True, x1=True, x2=False)
     curvature = process2d.fit_curvature(photon_events,
                                         np.array([0., 0]))
 
@@ -81,6 +80,7 @@ def test_photon_events_to_image():
     assert_array_almost_equal(y[1:-1], y_centers)
     assert_array_almost_equal(x[1:-1], x_centers)
     assert_array_almost_equal(image, np.identity(image.shape[0]))
+
 
 def test_estimate_elastic_pos():
     """Test estimate_elastic_pos"""
