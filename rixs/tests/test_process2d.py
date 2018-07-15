@@ -2,10 +2,8 @@ from rixs import process2d
 import numpy as np
 from numpy.random import rand
 from numpy.testing import assert_array_almost_equal
-import pytest
 
 
-@pytest.fixture
 def make_fake_image(curvature, elastic_y, sigma=2, noise=0.002):
     """Make a fake list of photon events.
     Parameters
