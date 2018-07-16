@@ -71,14 +71,16 @@ def test_photon_events_to_image():
     x = np.arange(0, 10)
     y = np.copy(x)
     Iph = np.ones_like(x)
+
     photon_events = np.vstack((x, y, Iph)).T
     image_info = process2d.photon_events_to_image(photon_events)
     x_centers, y_centers, image, *_ = image_info
 
+    corresponding_image = np.identity(image.shape[0])[::-1, :]
+
     assert_array_almost_equal(x[1:-1], x_centers)
-    assert_array_almost_equal(y[1:-1], y_centers)
-    assert_array_almost_equal(x[1:-1], x_centers)
-    assert_array_almost_equal(image, np.identity(image.shape[0]))
+    assert_array_almost_equal(y[1:-1][::-1], y_centers)
+    assert_array_almost_equal(image, corresponding_image)
 
 
 def test_estimate_elastic_pos():

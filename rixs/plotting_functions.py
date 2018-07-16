@@ -83,9 +83,7 @@ def plot_pcolor(ax, photon_events, cax=None, bins=None, **kwargs):
     kwargs.update({key: val for key, val in defaults.items()
                    if key not in kwargs})
 
-    xlim = (x_edges.min(), x_edges.max())
-    ylim = (y_edges.min(), y_edges.max())
-    image_artist = ax.pcolorfast(xlim, ylim, image, **kwargs)
+    image_artist = ax.pcolorfast(x_edges, y_edges, image, **kwargs)
     cb_artist = plt.colorbar(image_artist, ax=ax, cax=cax)
     ax.axis('tight')
 
