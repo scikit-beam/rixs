@@ -1,7 +1,5 @@
 """ Functions for processing 2D Image data.
 
-Typical command line workflow is executed in run_rest()
-
 Parameters
 ----------
 selected_image_name : string
@@ -12,7 +10,8 @@ photon_events : array
 curvature : array
     The polynominal coeffcients describing the image curvature.
     These are in decreasing order e.g.
-    curvature[0]*x^2 + curvature[1]*x^1, + curvature[2]*x^0,
+    .. code-block:: python
+       curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
 image_meta : string
     container for metadata
 spectrum: array
@@ -92,7 +91,8 @@ def fit_curvature(photon_events, guess_curvature, bins=None):
     curvature : array
         The polynominal coeffcients describing the image curvature.
         These are in decreasing order e.g.
-        curvature[0]*x^2 + curvature[1]*x^1, + curvature[2]*x^0, `
+        .. code-block:: python
+           curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
     bins : int or array_like or [int, int] or [array, array]
         The bin specification in y then x order:
             * If int, the number of bins for the two dimensions (nx=ny=bins).
@@ -119,7 +119,6 @@ def fit_curvature(photon_events, guess_curvature, bins=None):
 def estimate_elastic_pos(photon_events, x_range=(0, 20), bins=None):
     """
     Estimate where the elastic line is.
-
 
     Parameters
     ----------
@@ -152,7 +151,7 @@ def estimate_elastic_pos(photon_events, x_range=(0, 20), bins=None):
     return elastic_y_value
 
 
-def extract(photon_events, curvature, bins=None):
+def apply_curvature(photon_events, curvature, bins=None):
     """Apply curvature to photon events to create pixel versus intensity spectrum
 
     Parameters
@@ -162,7 +161,8 @@ def extract(photon_events, curvature, bins=None):
     curvature : array
         The polynominal coeffcients describing the image curvature.
         These are in decreasing order e.g.
-    curvature[0]*x^2 + curvature[1]*x^1, + curvature[2]*x^0,
+        .. code-block:: python
+       curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
     bins : int or sequence of scalars or str, optional
         Binning in the y direction.
         If 'bins' is None a step of 1 is assumed over the relavant range

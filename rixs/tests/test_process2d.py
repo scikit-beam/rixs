@@ -11,7 +11,8 @@ def make_fake_image(curvature, elastic_y, sigma=2, noise=0.002):
     curvature : array
         The polynominal coeffcients describing the image curvature.
         These are in decreasing order e.g.
-        curvature[0]*x^2 + curvature[1]*x^1, + curvature[2]*x^0, `
+        .. code-block:: python
+           curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
     elastic_y : float
         height (y value) to locate the elastic line
     noise : float
@@ -48,8 +49,8 @@ def test_curvature_fit():
     assert(ratio < 0.05)
 
 
-def test_extract():
-    """Test extract on simulated data."""
+def test_apply_curvature():
+    """Test apply_curvature on simulated data."""
     y_edges = np.arange(-0.5, 100.5, 1)
     y_centers = (y_edges[:-1] + y_edges[1:])/2
     x_centers = 100*rand(y_centers.size)
@@ -57,9 +58,9 @@ def test_extract():
     Iph = np.exp(-(y_centers-50)**2)
 
     photon_events = np.vstack((x_centers, y_centers, Iph)).transpose()
-    spectrum = process2d.extract(photon_events,
-                                 curvature=np.array([0., 0., 0.]),
-                                 bins=y_edges)
+    spectrum = process2d.apply_curvature(photon_events,
+                                         curvature=np.array([0., 0., 0.]),
+                                         bins=y_edges)
 
     assert_array_almost_equal(y_centers, spectrum[:, 0])
     assert_array_almost_equal(Iph, spectrum[:, 1])
