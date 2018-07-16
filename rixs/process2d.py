@@ -247,3 +247,31 @@ def photon_events_to_image(photon_events, bins=None):
     y_edges = y_edges[::-1]
 
     return x_centers, y_centers, image, x_edges, y_edges
+
+
+def image_to_photon_events(image):
+    """ Convert 2D image into 1D photon events
+    This assumes integers define the centers of bins.
+    Zeros are not included.
+
+    Parameters
+    -----------
+    image : 2D np.array
+        photon intensities
+
+    Returns
+    -----------
+    photon_events : np.array
+        three column x, y, Iph photon locations and intensities
+    """
+    x_centers = np.arange(image.shape[1])
+    y_centers = np.arange(image.shape[0])[::-1]  # +ve y is up convention
+    X_CENTERS, Y_CENTERS = np.meshgrid(x_centers, y_centers)
+
+    choose = image > 0
+
+    photon_events = np.vstack((X_CENTERS[choose].ravel(),
+                               Y_CENTERS[choose].ravel(),
+                               image[choose].ravel())).T
+
+    return photon_events
