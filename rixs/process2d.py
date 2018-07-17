@@ -219,7 +219,7 @@ def photon_events_to_image(photon_events, bins=None):
         1D vector describing column position
     y_centers : array
         1D vector describing row position
-        +ve y is up convetion is applied.
+        +ve y is up convention is applied.
     image : array
         2D image
     x_centers : array
