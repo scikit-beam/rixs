@@ -188,7 +188,7 @@ def apply_curvature(photon_events, curvature, bins=None):
                          corrected_y.max()//1 - 0.5)
     Ibin, y_edges = np.histogram(corrected_y, bins=bins, weights=Iph)
     y_centers = (y_edges[:-1] + y_edges[1:])/2
-    spectrum = np.vstack((y_centers, Ibin)).transpose()
+    spectrum = np.column_stack((y_centers, Ibin))
     return spectrum
 
 
@@ -270,8 +270,8 @@ def image_to_photon_events(image):
 
     choose = image > 0
 
-    photon_events = np.vstack((X_CENTERS[choose].ravel(),
-                               Y_CENTERS[choose].ravel(),
-                               image[choose].ravel())).T
+    photon_events = np.column_stack((X_CENTERS[choose].ravel(),
+                                     Y_CENTERS[choose].ravel(),
+                                     image[choose].ravel()))
 
     return photon_events
