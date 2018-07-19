@@ -6,6 +6,13 @@ cache:
     - $HOME/.cache/pip
     - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
 
+    env:
+      global:
+        # Doctr deploy key for scikit-beam/rixs
+        - secure:
+          "GbdaAkyg4gR1Iw1kNN+A4JFFJoCyyxgbN8q6LiY/qa9guLpp34Rpqt2kHabwiY41DmWin5/EvAY872u70zJRhsZrzMPG80Chag2DyEEveWVvp5TwjXZG+/boSy/lErxxi50WmeZ9owrJbrQZwaHRoOALmHyKpkKq9dl1NNAg3gwQ39HFGiFzLM+6EFdz+W1B9m4opUBKmRcJFn3nQnNXkYTgUb18O1aQcWGlmq+vznLf5gaeAGXYgV3X59hecWetVsvs/vJJ3xhp7RANEtm3jSInc1LA6sahyL0uAPh5lAcai/ghnnTcrJJiAKUH7gxNIJDPU6zSNuKc4xV7BUK8Xb/Kk8CJIIR/46MTXRz2nzt8yC9v/DiIJPe2zh4zNhLmsuh8e9YNSjFw1GKkoyBG9Q20BAKY2njZmvnonkDkr/83tI6ZheE2mr9riKLeniwV0wEi/QU5lYUrDuD/cugVyhY8cgB138TZlcCOjqB2TAmFRUb1Wy6YeAgaIc9RK87sUfBUM49Cp/sItmcQOeWZKC6WC0l7p2u70cRdatOjLSpFML3ukJTN1zzLGDuCwAMArbApaZ/AujmyR4S8a0u/JUcKBP4SLY18GtI7WfRoNbHNeUy2gq+bM8Shg8wrkUFeN7cSd40k4jwScPZF0UQLzzqBBR7Y7bp8mGXZ+Fg1J8o="
+
+
 install:
   # Install this package and the packages listed in requirements.txt.
   - pip install .
@@ -17,4 +24,7 @@ script:
   - coverage report -m  # Generate test coverage report.
   - codecov  # Upload the report to codecov.
   - flake8 --max-line-length=115  # Enforce code style (but relax line length limit a bit).
+  - set -e # If any of the following steps fail, just stop at that point
   - make -C docs html  # Build the documentation.
+  - pip install doctr
+  - doctr deploy --built-docs docs/build/html .  # Publish the documentation
