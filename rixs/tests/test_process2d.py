@@ -68,17 +68,31 @@ def test_apply_curvature():
 
 def test_photon_events_to_image():
     """Test conversion to image"""
-    x = np.arange(0, 10)
+    size = 10
+    x = np.arange(0, size)
     y = np.copy(x)
     Iph = np.ones_like(x)
+
     photon_events = np.vstack((x, y, Iph)).T
     image_info = process2d.photon_events_to_image(photon_events)
     x_centers, y_centers, image, *_ = image_info
 
+    corresponding_image = np.identity(image.shape[0])[::-1, :]
+
     assert_array_almost_equal(x[1:-1], x_centers)
-    assert_array_almost_equal(y[1:-1], y_centers)
-    assert_array_almost_equal(x[1:-1], x_centers)
-    assert_array_almost_equal(image, np.identity(image.shape[0]))
+    assert_array_almost_equal(y[1:-1][::-1], y_centers)
+    assert_array_almost_equal(image, corresponding_image)
+
+
+def test_image_to_photon_events():
+    """Test conversion between image and photon_events"""
+    size = 10
+    image = np.identity(10)[::-1, :]
+
+    photon_events = process2d.image_to_photon_events(image)
+    assert_array_almost_equal(photon_events[:, 0], np.arange(size)[::-1])
+    assert_array_almost_equal(photon_events[:, 1], np.arange(size)[::-1])
+    assert_array_almost_equal(photon_events[:, 2], np.ones(size))
 
 
 def test_estimate_elastic_pos():

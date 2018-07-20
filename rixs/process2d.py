@@ -188,13 +188,15 @@ def apply_curvature(photon_events, curvature, bins=None):
                          corrected_y.max()//1 - 0.5)
     Ibin, y_edges = np.histogram(corrected_y, bins=bins, weights=Iph)
     y_centers = (y_edges[:-1] + y_edges[1:])/2
-    spectrum = np.vstack((y_centers, Ibin)).transpose()
+    spectrum = np.column_stack((y_centers, Ibin))
     return spectrum
 
 
 def photon_events_to_image(photon_events, bins=None):
     """ Convert 1D photon events into 2D image
-    Opposite of image_to_photon_events
+    In the default binning, data at the edges is excluded, so that
+    problems with half empty bins are avoided. This might come at
+    the cost of loosing half a pixel of data.
 
     Parameters
     -----------
@@ -217,6 +219,7 @@ def photon_events_to_image(photon_events, bins=None):
         1D vector describing column position
     y_centers : array
         1D vector describing row position
+        +ve y is up convention is applied.
     image : array
         2D image
     x_centers : array
@@ -237,4 +240,38 @@ def photon_events_to_image(photon_events, bins=None):
     y_centers = (y_edges[:-1] + y_edges[1:])/2
     x_centers = (x_edges[:-1] + x_edges[1:])/2
 
+    # impose +ve y is up convention
+    yorder = np.argsort(y_centers)[::-1]
+    y_centers = y_centers[yorder]
+    image = image[yorder, :]
+    y_edges = y_edges[::-1]
+
     return x_centers, y_centers, image, x_edges, y_edges
+
+
+def image_to_photon_events(image):
+    """ Convert 2D image into 1D photon events
+    This assumes integers define the centers of bins.
+    Zeros are not included.
+
+    Parameters
+    -----------
+    image : 2D np.array
+        photon intensities
+
+    Returns
+    -----------
+    photon_events : np.array
+        three column x, y, Iph photon locations and intensities
+    """
+    x_centers = np.arange(image.shape[1])
+    y_centers = np.arange(image.shape[0])[::-1]  # +ve y is up convention
+    X_CENTERS, Y_CENTERS = np.meshgrid(x_centers, y_centers)
+
+    choose = image > 0
+
+    photon_events = np.column_stack((X_CENTERS[choose].ravel(),
+                                     Y_CENTERS[choose].ravel(),
+                                     image[choose].ravel()))
+
+    return photon_events
