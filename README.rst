@@ -12,7 +12,7 @@ rixs
 Analysis tools for resonant inelastic xray scattering.
 
 * Free software: 3-clause BSD license
-* Documentation: (COMING SOON!) https://awalter-bnl.github.io/rixs.
+* Documentation: https://scikit-beam.github.io/rixs/.
 
 Features
 --------
