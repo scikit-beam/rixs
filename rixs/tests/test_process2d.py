@@ -89,7 +89,7 @@ def test_image_to_photon_events():
     size = 10
     image = np.identity(10)[::-1, :]
 
-    photon_events = process2d.image_to_photon_events(image)
+    photon_events = process2d.image_to_photon_events(image, min_threshold=0.)
     assert_array_almost_equal(photon_events[:, 0], np.arange(size)[::-1])
     assert_array_almost_equal(photon_events[:, 1], np.arange(size)[::-1])
     assert_array_almost_equal(photon_events[:, 2], np.ones(size))

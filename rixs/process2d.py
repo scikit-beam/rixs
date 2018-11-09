@@ -249,7 +249,7 @@ def photon_events_to_image(photon_events, bins=None):
     return x_centers, y_centers, image, x_edges, y_edges
 
 
-def image_to_photon_events(image):
+def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
     """ Convert 2D image into 1D photon events
     This assumes integers define the centers of bins.
     Zeros are not included.
@@ -258,6 +258,12 @@ def image_to_photon_events(image):
     -----------
     image : 2D np.array
         photon intensities
+    min_threshold : float
+        fliter events below this threshold
+        defaults to -infinity to include all events
+    max_threshold : float
+        fliter events above this threshold
+        defaults to +infinity to include all events
 
     Returns
     -----------
@@ -268,7 +274,8 @@ def image_to_photon_events(image):
     y_centers = np.arange(image.shape[0])[::-1]  # +ve y is up convention
     X_CENTERS, Y_CENTERS = np.meshgrid(x_centers, y_centers)
 
-    choose = image > 0
+    choose = np.logical_and(image > min_threshold,
+                            image < max_threshold)
 
     photon_events = np.column_stack((X_CENTERS[choose].ravel(),
                                      Y_CENTERS[choose].ravel(),
