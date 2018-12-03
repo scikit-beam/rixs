@@ -271,7 +271,7 @@ def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
         three column x, y, Iph photon locations and intensities
     """
     x_centers = np.arange(image.shape[1])
-    y_centers = np.arange(image.shape[0])[::-1]  # +ve y is up convention
+    y_centers = np.arange(image.shape[0])
     X_CENTERS, Y_CENTERS = np.meshgrid(x_centers, y_centers)
 
     choose = np.logical_and(image > min_threshold,
