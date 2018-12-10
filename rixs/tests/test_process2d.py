@@ -70,7 +70,7 @@ def test_photon_events_to_image():
     """Test conversion to image"""
     size = 10
     x = np.arange(0, size)
-    y = np.arange(size-1, -1, -1) 
+    y = np.arange(size-1, -1, -1)
     Iph = np.ones_like(x)
 
     photon_events = np.vstack((x, y, Iph)).T
