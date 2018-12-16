@@ -151,7 +151,7 @@ def estimate_elastic_pos(photon_events, x_range=(0, 20), bins=None):
     return elastic_y_value
 
 
-def apply_curvature(photon_events, curvature, bins=None):
+def apply_curvature(photon_events, curvature, bins=1):
     """Apply curvature to photon events to create pixel versus intensity spectrum
 
     Parameters
@@ -163,13 +163,14 @@ def apply_curvature(photon_events, curvature, bins=None):
         These are in decreasing order e.g.
         .. code-block:: python
        curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
-    bins : int or sequence of scalars or str, optional
+    bins : float or array like
         Binning in the y direction.
-        If 'bins' is None a step of 1 is assumed over the relavant range
-        If `bins` is an int, it defines the number of equal-width
-        bins in the given range (10, by default). If `bins` is a
-        sequence, it defines the bin edges, including the rightmost
-        edge, allowing for non-uniform bin widths.
+        If `bins` is a sequence, it defines the bin edges,
+        including the rightmost edge.
+        If `bins' is a single number this defines the step
+        in the bins sequence, which is created using the min/max
+        of in input data. Half a bin may be discarded in order
+        to avoid errors at the edge. (Default 1.)
 
     Returns
     -------
@@ -183,9 +184,11 @@ def apply_curvature(photon_events, curvature, bins=None):
     curvature[-1] = 0
     corrected_y = y - np.polyval(curvature, x)
 
-    if bins is None:
-        bins = np.arange(corrected_y.min()//1 + 0.5,
-                         corrected_y.max()//1 - 0.5)
+    try:
+        iter(bins)
+    except TypeError:
+        bins = step_to_bins(corrected_y.min(), corrected_y.max(), bins)
+
     Ibin, y_edges = np.histogram(corrected_y, bins=bins, weights=Iph)
     y_centers = (y_edges[:-1] + y_edges[1:])/2
     spectrum = np.column_stack((y_centers, Ibin))
