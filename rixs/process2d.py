@@ -282,3 +282,27 @@ def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
                                      image[choose].ravel()))
 
     return photon_events
+
+
+def step_to_bins(y_min, y_max, step):
+    """
+    Construct bins based on a defined step.
+
+    Parameters
+    ----------
+    y_min : float
+        start point of bins range. (modified to )
+    y_max : float
+        end point of bins range
+
+    Returns
+    --------
+    bins : array
+        bin edges for binning on with steps of step
+        and start/end points defined to avoid partially
+        filled bins
+    """
+    start = step*(y_min/step)//1 + step/2
+    stop = step*(y_max/step)//1 - step/2
+    bins = np.arange(start, stop, step)
+    return bins
