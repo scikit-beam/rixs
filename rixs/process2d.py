@@ -303,18 +303,19 @@ def step_to_bins(y_min, y_max, step):
     Parameters
     ----------
     y_min : float
-        start point of bins range. (modified to )
+        start point of bins range.
     y_max : float
-        end point of bins range
+        end point of bins range.
+        step.
 
     Returns
     --------
     bins : array
         bin edges for binning on with steps of step
         and start/end points defined to avoid partially
-        filled bins
+        filled bins and make bin centers rational numbers.
     """
-    start = step*(y_min/step)//1 + step/2
-    stop = step*(y_max/step)//1 - step/2
+    start = step*(((y_min + step/2)/step)//1) + step/2
+    stop = step*(((y_max - step/2)/step)//1 + 1) + step/2
     bins = np.arange(start, stop, step)
     return bins
