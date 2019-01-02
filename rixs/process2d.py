@@ -352,7 +352,7 @@ def determine_broadness(curvature_no_offset, photon_events, bins):
     as a description of how broad the spectrum is.
     This is the quantity that one want to minimize by determining
     the optimal curvature parameters.
-    
+
     Parameters
     ------------
     photon_events : array
@@ -375,7 +375,7 @@ def determine_broadness(curvature_no_offset, photon_events, bins):
     Returns
     ------------
     broadness : float
-        Peak width (FWHM) over weight height  
+        Peak width (FWHM) over weight height
     """
     x, y = apply_curvature(photon_events,
                            np.hstack((curvature_no_offset, 0)),
@@ -388,10 +388,11 @@ def determine_broadness(curvature_no_offset, photon_events, bins):
 
 
 def optimize_curvature(photon_events, curvature_guess, bins=1):
-    """Determine what curvature leads to the narrowest gaussian fit to the spectrum.
-    This method is only suitable for data measured on an elastic reference, but should
-    be more accurate than fit_curature().
-    
+    """Determine what curvature leads to the narrowest gaussian
+    fit to the spectrum. This method is only suitable for data
+    measured on an elastic reference, but should be more accurate
+    than fit_curature().
+
     Parameters
     ------------
     photon_events : array
@@ -409,14 +410,14 @@ def optimize_curvature(photon_events, curvature_guess, bins=1):
         in the bins sequence, which is created using the min/max
         of in input data. Half a bin may be discarded in order
         to avoid errors at the edge. (Default 1.)
-    
+
     Returns
     ------------
     curvature : array
         The polynominal coeffcients describing the image curvature.
         These are in decreasing order e.g.
         .. code-block:: python
-        curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0 
+        curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
     """
     result = minimize(determine_broadness, curvature_guess[:-1],
                       args=(photon_events, bins), method='nelder-mead')
