@@ -151,7 +151,7 @@ def estimate_elastic_pos(photon_events, x_range=(0, 20), bins=None):
     return elastic_y_value
 
 
-def apply_curvature(photon_events, curvature, bins=None):
+def apply_curvature(photon_events, curvature, bins=1):
     """Apply curvature to photon events to create pixel versus intensity spectrum
 
     Parameters
@@ -163,13 +163,14 @@ def apply_curvature(photon_events, curvature, bins=None):
         These are in decreasing order e.g.
         .. code-block:: python
        curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
-    bins : int or sequence of scalars or str, optional
+    bins : float or array like
         Binning in the y direction.
-        If 'bins' is None a step of 1 is assumed over the relavant range
-        If `bins` is an int, it defines the number of equal-width
-        bins in the given range (10, by default). If `bins` is a
-        sequence, it defines the bin edges, including the rightmost
-        edge, allowing for non-uniform bin widths.
+        If `bins` is a sequence, it defines the bin edges,
+        including the rightmost edge.
+        If `bins' is a single number this defines the step
+        in the bins sequence, which is created using the min/max
+        of in input data. Half a bin may be discarded in order
+        to avoid errors at the edge. (Default 1.)
 
     Returns
     -------
@@ -183,9 +184,11 @@ def apply_curvature(photon_events, curvature, bins=None):
     curvature[-1] = 0
     corrected_y = y - np.polyval(curvature, x)
 
-    if bins is None:
-        bins = np.arange(corrected_y.min()//1 + 0.5,
-                         corrected_y.max()//1 - 0.5)
+    try:
+        iter(bins)
+    except TypeError:
+        bins = step_to_bins(corrected_y.min(), corrected_y.max(), bins)
+
     Ibin, y_edges = np.histogram(corrected_y, bins=bins, weights=Iph)
     y_centers = (y_edges[:-1] + y_edges[1:])/2
     spectrum = np.column_stack((y_centers, Ibin))
@@ -249,7 +252,8 @@ def photon_events_to_image(photon_events, bins=None):
     return x_centers, y_centers, image, x_edges, y_edges
 
 
-def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
+def image_to_photon_events(image, x_centers=None, y_centers=None,
+                           min_threshold=-np.inf, max_threshold=np.inf):
     """ Convert 2D image into 1D photon events
     This assumes integers define the centers of bins.
     Zeros are not included.
@@ -258,6 +262,12 @@ def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
     -----------
     image : 2D np.array
         photon intensities
+    x_centers : 1D array
+        array of horizontal pixel indices
+        If None this is assumed to start at 0 in 1 unit steps
+    y_centers : 1D array
+        array of vertical pixel indices
+        If None this is assumed to start at 0 in 1 unit steps
     min_threshold : float
         fliter events below this threshold
         defaults to -infinity to include all events
@@ -270,8 +280,10 @@ def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
     photon_events : np.array
         three column x, y, Iph photon locations and intensities
     """
-    x_centers = np.arange(image.shape[1])
-    y_centers = np.arange(image.shape[0])
+    if x_centers is None:
+        x_centers = np.arange(image.shape[1])
+    if y_centers is None:
+        y_centers = np.arange(image.shape[0])
     X_CENTERS, Y_CENTERS = np.meshgrid(x_centers, y_centers)
 
     choose = np.logical_and(image > min_threshold,
@@ -282,3 +294,28 @@ def image_to_photon_events(image, min_threshold=-np.inf, max_threshold=np.inf):
                                      image[choose].ravel()))
 
     return photon_events
+
+
+def step_to_bins(y_min, y_max, step):
+    """
+    Construct bins based on a defined step.
+
+    Parameters
+    ----------
+    y_min : float
+        start point of bins range.
+    y_max : float
+        end point of bins range.
+        step.
+
+    Returns
+    --------
+    bins : array
+        bin edges for binning on with steps of step
+        and start/end points defined to avoid partially
+        filled bins and make bin centers rational numbers.
+    """
+    start = step*(((y_min + step/2)/step)//1) + step/2
+    stop = step*(((y_max - step/2)/step)//1 + 1) + step/2
+    bins = np.arange(start, stop, step)
+    return bins

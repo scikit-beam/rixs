@@ -51,19 +51,21 @@ def test_curvature_fit():
 
 def test_apply_curvature():
     """Test apply_curvature on simulated data."""
-    y_edges = np.arange(-0.5, 100.5, 1)
-    y_centers = (y_edges[:-1] + y_edges[1:])/2
-    x_centers = 100*rand(y_centers.size)
+    for y_edges in [np.arange(-0.5, 100.5, 1),
+                    np.arange(-7.5, 76.5, 2),
+                    np.arange(-2, 50.3, 0.2)]:
+        y_centers = (y_edges[:-1] + y_edges[1:])/2
+        x_centers = 100*rand(y_centers.size)
 
-    Iph = np.exp(-(y_centers-50)**2)
+        Iph = np.exp(-(y_centers-50)**2)
 
-    photon_events = np.vstack((x_centers, y_centers, Iph)).transpose()
-    spectrum = process2d.apply_curvature(photon_events,
-                                         curvature=np.array([0., 0., 0.]),
-                                         bins=y_edges)
+        photon_events = np.vstack((x_centers, y_centers, Iph)).transpose()
+        spectrum = process2d.apply_curvature(photon_events,
+                                             curvature=np.array([0., 0., 0.]),
+                                             bins=y_edges)
 
-    assert_array_almost_equal(y_centers, spectrum[:, 0])
-    assert_array_almost_equal(Iph, spectrum[:, 1])
+        assert_array_almost_equal(y_centers, spectrum[:, 0])
+        assert_array_almost_equal(Iph, spectrum[:, 1])
 
 
 def test_photon_events_to_image():
@@ -106,3 +108,9 @@ def test_estimate_elastic_pos():
 
     elastic_est = process2d.estimate_elastic_pos(photon_events)
     assert_array_almost_equal(y[elastic_ind], elastic_est)
+
+
+def test_step_to_bins():
+    """Test steps_to_bins"""
+    assert_array_almost_equal(process2d.step_to_bins(-1.1, 3, 0.5),
+                              np.arange(-0.75, 2.75000001, 0.5))
