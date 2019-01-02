@@ -54,7 +54,7 @@ def test_optimize_curvature():
     fake_curvature = np.array([0.02, 1000.])
     photon_events = make_fake_image(fake_curvature, 1000., noise=0)
     curvature = process2d.optimize_curvature(photon_events,
-                                             np.array([0., 0], bins=0.25))
+                                             np.array([0., 0]), bins=0.25)
 
     val = curvature[0]
     guess = fake_curvature[0]
