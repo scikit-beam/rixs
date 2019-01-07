@@ -23,6 +23,8 @@ resolution : array
 
 import numpy as np
 from numpy.polynomial.polynomial import polyfit
+from scipy.optimize import curve_fit
+from scipy.optimize import minimize
 
 
 def get_curvature_offsets(photon_events, bins=None):
@@ -297,8 +299,7 @@ def image_to_photon_events(image, x_centers=None, y_centers=None,
 
 
 def step_to_bins(y_min, y_max, step):
-    """
-    Construct bins based on a defined step.
+    """Construct bins based on a defined step.
 
     Parameters
     ----------
@@ -319,3 +320,109 @@ def step_to_bins(y_min, y_max, step):
     stop = step*(((y_max - step/2)/step)//1 + 1) + step/2
     bins = np.arange(start, stop, step)
     return bins
+
+
+def gauss(x, height, center, FWHM, background=0):
+    """Gaussian function defined by peak height and full width
+    at half maximum (FWHM). A background is included.
+
+    Parameters
+    ------------
+    x : array
+        Independent variable
+    height : float
+        Peak height of the gaussian
+    center : float
+        Center of the gaussian
+    FWHM : float
+        Full width at half maximum.
+    background : float
+
+    Returns
+    ------------
+    y : array
+        Values describing Gaussian
+    """
+    sigma = FWHM / (2 * np.sqrt(2*np.log(2)))
+    return height * np.exp(-(x-center)**2 / (2*sigma**2)) + background
+
+
+def determine_broadness(curvature_no_offset, photon_events, bins):
+    """Fit a gaussian to photon_events and return FWHM/peak height
+    as a description of how broad the spectrum is.
+    This is the quantity that one want to minimize by determining
+    the optimal curvature parameters.
+
+    Parameters
+    ------------
+    photon_events : array
+        three column x, y , Iph photon locations and intensities
+    curvature_no_offset : array
+        The polynominal coeffcients describing the image curvature.
+        Excluding the final constant term.
+        These are in decreasing order e.g.
+        .. code-block:: python
+        curvature[0]*x**2 + curvature[1]*x**1
+    bins : float or array like
+        Binning in the y direction.
+        If `bins` is a sequence, it defines the bin edges,
+        including the rightmost edge.
+        If `bins' is a single number this defines the step
+        in the bins sequence, which is created using the min/max
+        of in input data. Half a bin may be discarded in order
+        to avoid errors at the edge. (Default 1.)
+
+    Returns
+    ------------
+    broadness : float
+        Peak width (FWHM) over weight height
+    """
+    x, y = apply_curvature(photon_events,
+                           np.hstack((curvature_no_offset, 0)),
+                           bins=bins).T
+    bounds = ([0, -np.inf, 0], [np.inf, np.inf, np.inf])
+    p0 = [np.max(y), x[np.argmax(y)], (np.max(x)-np.min(x))/20]
+    popt, _ = curve_fit(gauss, x, y, p0=p0, bounds=bounds)
+    broadness = popt[2]/popt[0]
+    return broadness
+
+
+def optimize_curvature(photon_events, curvature_guess, bins=1):
+    """Determine what curvature leads to the narrowest gaussian
+    fit to the spectrum. This method is only suitable for data
+    measured on an elastic reference, but should be more accurate
+    than fit_curature().
+
+    Parameters
+    ------------
+    photon_events : array
+        three column x, y , Iph photon locations and intensities
+    curvature_guess : array
+        The polynominal coeffcients describing the initial guess for the image
+        curvature. These are in decreasing order e.g.
+        .. code-block:: python
+       curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
+    bins : float or array like
+        Binning in the y direction.
+        If `bins` is a sequence, it defines the bin edges,
+        including the rightmost edge.
+        If `bins' is a single number this defines the step
+        in the bins sequence, which is created using the min/max
+        of in input data. Half a bin may be discarded in order
+        to avoid errors at the edge. (Default 1.)
+
+    Returns
+    ------------
+    curvature : array
+        The polynominal coeffcients describing the image curvature.
+        These are in decreasing order e.g.
+        .. code-block:: python
+        curvature[0]*x**2 + curvature[1]*x**1 + curvature[2]*x**0
+    """
+    result = minimize(determine_broadness, curvature_guess[:-1],
+                      args=(photon_events, bins), method='nelder-mead')
+    if result['success']:
+        curvature = np.hstack((result['x'], curvature_guess[-1]))
+        return curvature
+    else:
+        raise Exception("Unsuccess fit: {}".format(result['message']))
